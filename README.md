@@ -1,11 +1,20 @@
-require 'binary_parser.rb'
+Binary Processor
+================
 
+Binary processor is a simple tool to parse binary file to human readable format. I used this
+script to parse network communication at Balabit IT Security.
+
+<ol>
+<li>First we define the data structures. The following example will parse IP packets:</li>
+
+<pre>
+require 'binary_parser.rb'
 include BinaryProcessor
 
 # Define IP type according to RFC. It will be registered as according to the first parameter,
 # which is currently the :IP.
 Packet.type :IP do |ip|
-  
+
   # You can use 4.bits to read 4 bits
   ip.version          4.bits, :unsigned
   ip.header_length    4.bits, :unsigned
@@ -21,7 +30,7 @@ Packet.type :IP do |ip|
     value[0x110] = "Internet Control"
     value[0x111] = "Network Control"
   end
-  
+
   # You can display its value in decimal form
   ip.total_length_of_whole_datagram 2.bytes, :decimal
   ip.identification 2.bytes
@@ -45,19 +54,23 @@ Packet.type :IP do |ip|
     ip.option_class 2.bits {|v| v = {0x0 => "control", 0x02 => "debugging measurement"}}
     ip.option_class 5.bits
   end
-
 end
+</pre>
 
-# Define a packet in array form (currently this is the only supported solution)
+<li>Define a packet in array form (currently this is the only supported solution)</li>
+<pre>
 packet = [0x45, 0x00, 0x05, 0xd4, 0x73, 0x67, 0x40, 0x00, 0x39, 0x06, 0x48, 0x94, 0x58, 0x97, 0x65, 0xe7,
           0xc0, 0xa8, 0x01, 0x02, 0x03, 0xe1, 0xdf, 0x78, 0xf1, 0x08, 0xa7, 0x6e, 0xd6, 0x89, 0x92, 0x85]
+</pre>
 
-# Process the packet as an :IP
+<li>Process the packet as an :IP</li>
+<pre>
 Packet.process packet, [:IP]
+</pre>
 
-
-# The result on stdout (my plan is to create JSON format)
-IP { 
+The result on stdout (my plan is to create JSON format):
+<pre>
+IP {
   version: 4
   header_length: 5
   type_of_service: Routine [0x0]
@@ -70,4 +83,11 @@ IP {
   header_checksum: 100100010010100
   source_address: 1486317031
   target_address: 3232235778
-} 
+}
+</pre>
+</ol>
+
+Contribution
+============
+
+If you have any patch just send me a pull request.
